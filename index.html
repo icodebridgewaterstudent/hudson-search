@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hudson Search</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/png" href="cool-logo.png">
+    <style>
+        .mine-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+        }
+
+        .mine-grid .game-cell {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <div class="settings">
+        <button id="settings-button">⚙️ Settings</button>
+
+        <aside id="settings-panel">
+            <h2>Settings</h2>
+
+            <details open>
+                <summary>Appearance</summary>
+
+                <label>Color theme
+                    <select id="color-theme">
+                        <option value="#9400ff">Purple</option>
+                        <option value="#1976d2">Blue</option>
+                        <option value="#00897b">Teal</option>
+                        <option value="#e65100">Orange</option>
+                        <option value="#c2185b">Pink</option>
+                        <option value="#388e3c">Green</option>
+                    </select>
+                </label>
+
+                <label>Text size
+                    <select id="font-size">
+                        <option value="1">Normal</option>
+                        <option value=".85">Small</option>
+                        <option value="1.2">Large</option>
+                    </select>
+                </label>
+
+                <label>Button size
+                    <select id="button-size">
+                        <option value="small">Small</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="large">Large</option>
+                    </select>
+                </label>
+
+                <label class="check">
+                    <input id="compact-layout" type="checkbox">
+                    Compact layout
+                </label>
+
+                <label class="check">
+                    <input id="button-animations" type="checkbox" checked>
+                    Button animations
+                </label>
+
+                <button id="theme-setting">Toggle dark mode</button>
+            </details>
+
+            <details open>
+                <summary>Calculator</summary>
+
+                <label>Decimal precision
+                    <select id="decimal-precision">
+                        <option value="2">2 places</option>
+                        <option value="4">4 places</option>
+                        <option value="6">6 places</option>
+                        <option value="10">10 places</option>
+                    </select>
+                </label>
+
+                <label>Angle mode
+                    <select id="angle-mode">
+                        <option value="degrees">Degrees</option>
+                        <option value="radians">Radians</option>
+                    </select>
+                </label>
+
+                <label>Calculator position
+                    <select id="calculator-position">
+                        <option value="center">Center</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                    </select>
+                </label>
+
+                <label class="check">
+                    <input id="scientific" type="checkbox">
+                    Scientific calculator
+                </label>
+
+                <button id="reset-display">Reset calculator display</button>
+            </details>
+
+            <details open>
+                <summary>History</summary>
+
+                <label>History limit
+                    <select id="history-limit">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                    </select>
+                </label>
+
+                <label class="check">
+                    <input id="show-history" type="checkbox" checked>
+                    Show history
+                </label>
+
+                <label class="check">
+                    <input id="show-timestamps" type="checkbox">
+                    Show timestamps
+                </label>
+
+                <label class="check">
+                    <input id="confirm-clear" type="checkbox" checked>
+                    Confirm before clearing
+                </label>
+            </details>
+
+            <details open>
+                <summary>Preferences</summary>
+
+                <label class="check">
+                    <input id="sound" type="checkbox">
+                    Button sounds
+                </label>
+
+                <label class="check">
+                    <input id="auto-save" type="checkbox" checked>
+                    Auto-save settings
+                </label>
+
+                <button id="reset-settings">Reset settings</button>
+            </details>
+        </aside>
+    </div>
+
+    <h1>Hudson Search</h1>
+
+    <script async src="https://cse.google.com/cse.js?cx=c2bd1cf8148ee444a"></script>
+    <div class="gcse-search"></div>
+
+    <nav class="feature-tabs">
+        <button class="tab active" data-tab="calculator-tab">Calculator</button>
+        <button class="tab" data-tab="converter-tab">Converter</button>
+        <button class="tab" data-tab="tip-tab">Tip Calculator</button>
+        <button class="tab" data-tab="graph-tab">Graph</button>
+        <button class="tab" data-tab="games-tab">Games</button>
+    </nav>
+
+    <section id="calculator-tab" class="tab-content active">
+        <main class="calculator-area">
+            <section class="calculator">
+                <input id="display" value="0" readonly>
+
+                <div class="calculator-buttons">
+                    <button data-action="clear">AC</button>
+                    <button data-action="delete">⌫</button>
+                    <button data-action="percent">%</button>
+                    <button data-value="/">÷</button>
+                    <button data-value="7">7</button>
+                    <button data-value="8">8</button>
+                    <button data-value="9">9</button>
+                    <button data-value="*">×</button>
+                    <button data-value="4">4</button>
+                    <button data-value="5">5</button>
+                    <button data-value="6">6</button>
+                    <button data-value="-">−</button>
+                    <button data-value="1">1</button>
+                    <button data-value="2">2</button>
+                    <button data-value="3">3</button>
+                    <button data-value="+">+</button>
+                    <button data-value="0">0</button>
+                    <button data-value=".">.</button>
+                    <button data-action="calculate">=</button>
+                </div>
+
+                <div class="scientific-buttons">
+                    <button data-scientific="sin">sin</button>
+                    <button data-scientific="cos">cos</button>
+                    <button data-scientific="tan">tan</button>
+                    <button data-scientific="sqrt">√</button>
+                    <button data-scientific="square">x²</button>
+                    <button data-scientific="pi">π</button>
+                </div>
+            </section>
+
+            <aside class="history-panel">
+                <h2>History</h2>
+                <input id="history-search" placeholder="Search history">
+                <div id="history"></div>
+                <button id="clear-history">Clear</button>
+            </aside>
+        </main>
+    </section>
+
+    <section id="converter-tab" class="tab-content">
+        <h2>Unit Converter</h2>
+        <input id="convert-value" type="number" value="1">
+
+        <select id="convert-from">
+            <option value="meters">Meters</option>
+            <option value="kilometers">Kilometers</option>
+            <option value="feet">Feet</option>
+            <option value="miles">Miles</option>
+        </select>
+
+        <select id="convert-to">
+            <option value="meters">Meters</option>
+            <option value="kilometers">Kilometers</option>
+            <option value="feet">Feet</option>
+            <option value="miles">Miles</option>
+        </select>
+
+        <button id="convert-button">Convert</button>
+        <p id="convert-result">Result: 1</p>
+    </section>
+
+    <section id="tip-tab" class="tab-content">
+        <h2>Tip Calculator</h2>
+        <input id="bill-amount" type="number" placeholder="Bill amount">
+        <input id="tip-percent" type="number" value="15" placeholder="Tip percentage">
+        <input id="people-count" type="number" min="1" value="1" placeholder="People">
+        <button id="tip-button">Calculate</button>
+        <p id="tip-result">Tip: $0.00<br>Total: $0.00<br>Each person: $0.00</p>
+    </section>
+
+    <section id="graph-tab" class="tab-content">
+        <h2>Graph Equation</h2>
+        <input id="graph-equation" value="x * x">
+        <button id="graph-button">Create graph</button>
+        <canvas id="graph" width="700" height="350"></canvas>
+    </section>
+
+    <section id="games-tab" class="tab-content">
+        <h2>Games</h2>
+
+        <div class="game-buttons">
+            <button data-game="minesweeper">💣 Minesweeper</button>
+            <button data-game="memory">🧠 Memory</button>
+            <button data-game="trivia">❓ Trivia</button>
+            <button data-game="tictactoe">⭕ Tic-Tac-Toe</button>
+        </div>
+
+        <div id="game-area">
+            <p>Choose a game to begin.</p>
+        </div>
+    </section>
+
+    <section id="help-tab" class="tab-content">
+        <h2>Help</h2>
+        <p>Minesweeper: left-click to reveal and right-click to flag.</p>
+        <p>Numbers include bombs in diagonal squares.</p>
+    </section>
+
+    <button id="theme-toggle">☀️ Light Mode</button>
+
+    <script>
+        const $ = id => document.getElementById(id);
+
+        const defaults = {
+            color: "#9400ff",
+            font: "1",
+            size: "normal",
+            position: "center",
+            precision: 2,
+            angle: "degrees",
+            limit: 50,
+            scientific: false,
+            history: true,
+            timestamps: false,
+            confirm: true,
+            compact: false,
+            animations: true,
+            sound: false,
+            autosave: true
+        };
+
+        let settings = {
+            ...defaults,
+            ...JSON.parse(localStorage.getItem("settings") || "{}")
+        };
+
+        /* Pure Audio Context Oscillator Engine */
+        let audioCtx = null;
+
+        function playCalcBeep() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1046.5, audioCtx.currentTime); // C6 tone
+
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + 0.04); // Instant cutoff beep
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
+
+        function playGearSound() {
+            const gearAudio = new Audio('gear.mp3');
+            gearAudio.currentTime = 0;
+            gearAudio.play().catch(() => {});
+
+            setTimeout(() => {
+                gearAudio.pause();
+                gearAudio.currentTime = 0;
+            }, 120);
+        }
+
+        document.addEventListener('click', e => {
+            const button = e.target.closest('button');
+            if (!button || !settings.sound) return;
+
+            if (button.closest('.calculator')) {
+                playCalcBeep();
+            } else {
+                playGearSound();
+            }
+        });
+
+        function saveSettings() {
+            if (settings.autosave) {
+                localStorage.setItem("settings", JSON.stringify(settings));
+            }
+        }
+
+        function applySettings() {
+            document.documentElement.style.setProperty("--accent", settings.color);
+            document.documentElement.style.setProperty("--font-scale", settings.font);
+
+            document.body.classList.toggle("button-small", settings.size === "small");
+            document.body.classList.toggle("button-large", settings.size === "large");
+            document.body.classList.toggle("position-left", settings.position === "left");
+            document.body.classList.toggle("position-right", settings.position === "right");
+            document.body.classList.toggle("compact-layout", settings.compact);
+            document.body.classList.toggle("no-animations", !settings.animations);
+
+            $("color-theme").value = settings.color;
+            $("font-size").value = settings.font;
+            $("button-size").value = settings.size;
+            $("calculator-position").value = settings.position;
+            $("decimal-precision").value = settings.precision;
+            $("angle-mode").value = settings.angle;
+            $("history-limit").value = settings.limit;
+            $("scientific").checked = settings.scientific;
+            $("show-history").checked = settings.history;
+            $("show-timestamps").checked = settings.timestamps;
+            $("confirm-clear").checked = settings.confirm;
+            $("compact-layout").checked = settings.compact;
+            $("button-animations").checked = settings.animations;
+            $("sound").checked = settings.sound;
+            $("auto-save").checked = settings.autosave;
+
+            document.querySelector(".scientific-buttons").style.display =
+                settings.scientific ? "grid" : "none";
+
+            document.querySelector(".history-panel").hidden = !settings.history;
+        }
+
+        function update(key, value) {
+            settings[key] = value;
+            applySettings();
+            saveSettings();
+        }
+
+        $("color-theme").onchange = e => update("color", e.target.value);
+        $("font-size").onchange = e => update("font", e.target.value);
+        $("button-size").onchange = e => update("size", e.target.value);
+        $("calculator-position").onchange = e => update("position", e.target.value);
+        $("decimal-precision").onchange = e => update("precision", Number(e.target.value));
+        $("angle-mode").onchange = e => update("angle", e.target.value);
+        $("history-limit").onchange = e => update("limit", Number(e.target.value));
+        $("scientific").onchange = e => update("scientific", e.target.checked);
+        $("show-history").onchange = e => update("history", e.target.checked);
+        $("show-timestamps").onchange = e => update("timestamps", e.target.checked);
+        $("confirm-clear").onchange = e => update("confirm", e.target.checked);
+        $("compact-layout").onchange = e => update("compact", e.target.checked);
+        $("button-animations").onchange = e => update("animations", e.target.checked);
+        $("sound").onchange = e => update("sound", e.target.checked);
+        $("auto-save").onchange = e => update("autosave", e.target.checked);
+
+        $("settings-button").onclick = () => {
+            $("settings-panel").classList.toggle("open");
+        };
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            $("theme-toggle").textContent =
+                document.body.classList.contains("dark-mode")
+                    ? "☀️ Light Mode"
+                    : "🌙 Dark Mode";
+        }
+
+        $("theme-toggle").onclick = toggleTheme;
+        $("theme-setting").onclick = toggleTheme;
+
+        document.querySelectorAll(".tab").forEach(button => {
+            button.onclick = () => {
+                document.querySelectorAll(".tab, .tab-content")
+                    .forEach(item => item.classList.remove("active"));
+
+                button.classList.add("active");
+                $(button.dataset.tab).classList.add("active");
+            };
+        });
+
+        let leadingZero = false;
+
+        document.querySelectorAll("[data-value]").forEach(button => {
+            button.onclick = () => {
+                if ($("display").value === "Error") {
+                    $("display").value = "";
+                    leadingZero = false;
+                }
+
+                if ($("display").value === "0") {
+                    if (button.dataset.value === "0") {
+                        leadingZero = true;
+                        return;
+                    }
+
+                    if (!leadingZero) {
+                        $("display").value = "";
+                    }
+                }
+
+                $("display").value += button.dataset.value;
+                leadingZero = false;
+            };
+        });
+
+        $("display").onclick = () => $("display").value = "0";
+
+        $("display").onkeydown = e => {
+            if (e.key === "Enter") calculate();
+        };
+
+        $("display").oninput = () => {};
+
+        $("display").readOnly = false;
+
+        $("display").addEventListener("input", () => {
+            $("display").value = $("display").value.replace(/[^0-9+\-*/().]/g, "");
+        });
+
+        $("display").readOnly = true;
+
+        $("display").onclick = () => {};
+
+        $("display").setAttribute("aria-label", "Calculator display");
+
+        document.querySelector("[data-action='clear']").onclick = () => {
+            $("display").value = "0";
+            leadingZero = false;
+        };
+
+        document.querySelector("[data-action='delete']").onclick = () => {
+            $("display").value = $("display").value.slice(0, -1) || "0";
+        };
+
+        document.querySelector("[data-action='percent']").onclick = () => {
+            $("display").value = String(Number($("display").value) / 100);
+        };
+
+        document.querySelector("[data-action='calculate']").onclick = calculate;
+
+        function format(value) {
+            return Number(value.toFixed(settings.precision));
+        }
+
+        function calculate() {
+            const expression = $("display").value;
+
+            try {
+                if (!/^[0-9+\-*/().\s]+$/.test(expression)) throw Error();
+
+                const result = Function(`"use strict"; return (${expression})`)();
+
+                if (!Number.isFinite(result)) throw Error();
+
+                $("display").value = format(result);
+
+                const history = JSON.parse(localStorage.getItem("history") || "[]");
+                history.unshift({
+                    expression,
+                    result: $("display").value,
+                    timestamp: new Date().toLocaleString()
+                });
+
+                localStorage.setItem(
+                    "history",
+                    JSON.stringify(history.slice(0, settings.limit))
+                );
+
+                renderHistory();
+            } catch {
+                $("display").value = "Error";
+            }
+        }
+
+        document.querySelectorAll("[data-scientific]").forEach(button => {
+            button.onclick = () => {
+                const value = Number($("display").value);
+                const angle = settings.angle === "degrees"
+                    ? value * Math.PI / 180
+                    : value;
+
+                const results = {
+                    sin: Math.sin(angle),
+                    cos: Math.cos(angle),
+                    tan: Math.tan(angle),
+                    sqrt: Math.sqrt(value),
+                    square: value ** 2,
+                    pi: Math.PI
+                };
+
+                $("display").value = format(results[button.dataset.scientific]);
+            };
+        });
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem("history") || "[]");
+            const search = $("history-search").value.toLowerCase();
+
+            $("history").innerHTML = "";
+
+            history.forEach(item => {
+                const row = document.createElement("div");
+                row.className = "history-item";
+
+                if (!`${item.expression} ${item.result}`.toLowerCase().includes(search)) {
+                    row.hidden = true;
+                }
+
+                row.textContent = `${item.expression} = ${item.result}`;
+
+                if (settings.timestamps && item.timestamp) {
+                    const time = document.createElement("small");
+                    time.className = "history-time";
+                    time.textContent = item.timestamp;
+                    row.appendChild(time);
+                }
+
+                row.onclick = () => $("display").value = item.result;
+                $("history").appendChild(row);
+            });
+        }
+
+        $("history-search").oninput = renderHistory;
+
+        $("clear-history").onclick = () => {
+            if (settings.confirm && !confirm("Clear calculation history?")) return;
+            localStorage.removeItem("history");
+            renderHistory();
+        };
+
+        $("reset-display").onclick = () => {
+            $("display").value = "0";
+            leadingZero = false;
+        };
+
+        $("reset-settings").onclick = () => {
+            settings = { ...defaults };
+            localStorage.removeItem("settings");
+            applySettings();
+            renderHistory();
+        };
+
+        function convertUnits() {
+            const units = {
+                meters: 1,
+                kilometers: 1000,
+                feet: .3048,
+                miles: 1609.344
+            };
+
+            const value = Number($("convert-value").value);
+            const from = units[$("convert-from").value];
+            const to = units[$("convert-to").value];
+
+            if (!Number.isFinite(value) || !from || !to) {
+                $("convert-result").textContent = "Result: Enter a valid number";
+                return;
+            }
+
+            const result = value * from / to;
+
+            $("convert-result").textContent = `Result: ${Number(result.toFixed(settings.precision))}`;
+        }
+
+        $("convert-button").onclick = convertUnits;
+        $("convert-value").oninput = convertUnits;
+        $("convert-from").onchange = convertUnits;
+        $("convert-to").onchange = convertUnits;
+
+        $("tip-button").onclick = () => {
+            const bill = Number($("bill-amount").value) || 0;
+            const percent = Number($("tip-percent").value) || 0;
+            const people = Math.max(1, Number($("people-count").value) || 1);
+            const tip = bill * percent / 100;
+            const total = bill + tip;
+
+            $("tip-result").innerHTML =
+                `Tip: $${tip.toFixed(2)}<br>` +
+                `Total: $${total.toFixed(2)}<br>` +
+                `Each person: $${(total / people).toFixed(2)}`;
+        };
+
+        $("graph-button").onclick = () => {
+            const canvas = $("graph");
+            const ctx = canvas.getContext("2d");
+            const equation = $("graph-equation").value;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = settings.color;
+            ctx.beginPath();
+
+            for (let x = -10; x <= 10; x += .05) {
+                let y;
+
+                try {
+                    y = Function("x", `return ${equation}`)(x);
+                } catch {
+                    return;
+                }
+
+                if (!Number.isFinite(y)) continue;
+
+                const px = (x + 10) * 35;
+                const py = 175 - y * 20;
+
+                if (x === -10) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+
+            ctx.stroke();
+        };
+
+        function startMinesweeper() {
+            const size = 10;
+            const total = size * size;
+            const mineTotal = Math.floor(total / 4);
+            const mines = new Set();
+            const flags = new Set();
+            const cells = [];
+            let ended = false;
+
+            while (mines.size < mineTotal) {
+                mines.add(Math.floor(Math.random() * total));
+            }
+
+            $("game-area").innerHTML = `
+                <h3>Minesweeper</h3>
+                <p>Left-click to reveal. Right-click to flag.</p>
+                <div class="game-grid mine-grid" id="mine-grid"></div>
+                <p id="mine-status">Find all safe squares.</p>
+                <button id="mine-again">Restart</button>
+            `;
+
+            function neighbors(index) {
+                const row = Math.floor(index / size);
+                const col = index % size;
+                const result = [];
+
+                for (let r = -1; r <= 1; r++) {
+                    for (let c = -1; c <= 1; c++) {
+                        if (!r && !c) continue;
+
+                        const nr = row + r;
+                        const nc = col + c;
+
+                        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+                            result.push(nr * size + nc);
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            function reveal(index) {
+                const cell = cells[index];
+
+                if (!cell || cell.disabled || flags.has(index) || mines.has(index)) return;
+
+                const count = neighbors(index).filter(i => mines.has(i)).length;
+
+                cell.disabled = true;
+                cell.classList.add("revealed");
+                cell.textContent = count || "·";
+
+                if (!count) neighbors(index).forEach(reveal);
+
+                const safe = cells.filter((c, i) => c.disabled && !mines.has(i)).length;
+
+                if (safe === total - mineTotal) {
+                    ended = true;
+                    $("mine-status").textContent = "You won!";
+                }
+            }
+
+            function endGame(message) {
+                ended = true;
+                $("mine-status").textContent = message;
+
+                cells.forEach((cell, index) => {
+                    if (mines.has(index)) {
+                        cell.textContent = "💣";
+                        cell.classList.add("revealed");
+                    }
+
+                    cell.disabled = true;
+                });
+            }
+
+            for (let i = 0; i < total; i++) {
+                const cell = document.createElement("button");
+                cell.className = "game-cell";
+                cells.push(cell);
+
+                cell.onclick = () => {
+                    if (ended || flags.has(i)) return;
+                    if (mines.has(i)) endGame("Game over!");
+                    else reveal(i);
+                };
+
+                cell.oncontextmenu = event => {
+                    event.preventDefault();
+
+                    if (ended || cell.disabled) return;
+
+                    if (flags.has(i)) {
+                        flags.delete(i);
+                        cell.textContent = "";
+                        cell.classList.remove("flagged");
+                    } else {
+                        flags.add(i);
+                        cell.textContent = "🚩";
+                        cell.classList.add("flagged");
+                    }
+                };
+
+                $("mine-grid").appendChild(cell);
+            }
+
+            $("mine-again").onclick = startMinesweeper;
+        }
+
+        function startMemory() {
+            const symbols = ["🍎", "🍎", "🚀", "🚀", "🐱", "🐱", "⭐", "⭐"]
+                .sort(() => Math.random() - .5);
+
+            $("game-area").innerHTML = `
+                <h3>Memory</h3>
+                <div class="game-grid memory-grid" id="memory-grid"></div>
+                <p id="memory-status">Find the matching pairs.</p>
+            `;
+
+            let first = null;
+            let locked = false;
+            let matches = 0;
+
+            symbols.forEach(symbol => {
+                const card = document.createElement("button");
+                card.className = "game-cell memory-card";
+                card.textContent = symbol;
+
+                card.onclick = () => {
+                    if (locked || card.classList.contains("revealed")) return;
+
+                    card.classList.add("revealed");
+
+                    if (!first) {
+                        first = card;
+                    } else if (first.textContent === card.textContent) {
+                        first = null;
+                        matches++;
+
+                        if (matches === symbols.length / 2) {
+                            $("memory-status").textContent = "You won!";
+                        }
+                    } else {
+                        locked = true;
+
+                        setTimeout(() => {
+                            first.classList.remove("revealed");
+                            card.classList.remove("revealed");
+                            first = null;
+                            locked = false;
+                        }, 700);
+                    }
+                };
+
+                $("memory-grid").appendChild(card);
+            });
+        }
+
+        function startTrivia() {
+            const questions = [
+                ["What is 2 + 2?", ["3", "4", "5"], "4"],
+                ["Which planet is red?", ["Earth", "Mars", "Venus"], "Mars"],
+                ["How many sides does a triangle have?", ["2", "3", "4"], "3"],
+                ["What color is the sky?", ["Blue", "Green", "Red"], "Blue"],
+                ["What is 5 × 5?", ["10", "20", "25"], "25"],
+                ["Which animal says moo?", ["Dog", "Cow", "Cat"], "Cow"],
+                ["How many days are in a week?", ["5", "7", "10"], "7"],
+                ["What is the opposite of hot?", ["Cold", "Warm", "Dry"], "Cold"]
+            ].sort(() => Math.random() - .5).slice(0, 5);
+
+            let current = 0;
+            let score = 0;
+
+            function showQuestion() {
+                if (current === questions.length) {
+                    $("game-area").innerHTML = `
+                        <h3>Trivia complete!</h3>
+                        <p>Score: ${score}/${questions.length}</p>
+                        <button id="trivia-again">Play again</button>
+                    `;
+
+                    $("trivia-again").onclick = startTrivia;
+                    return;
+                }
+
+                const [question, answers, correct] = questions[current];
+
+                $("game-area").innerHTML = `
+                    <h3>${question}</h3>
+                    <div id="trivia-options"></div>
+                `;
+
+                [...answers].sort(() => Math.random() - .5).forEach(answer => {
+                    const button = document.createElement("button");
+                    button.textContent = answer;
+
+                    button.onclick = () => {
+                        if (answer === correct) score++;
+                        current++;
+                        showQuestion();
+                    };
+
+                    $("trivia-options").appendChild(button);
+                });
+            }
+
+            showQuestion();
+        }
+
+        function startTicTacToe() {
+            const board = Array(9).fill("");
+            const wins = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            $("game-area").innerHTML = `
+                <h3>Tic-Tac-Toe</h3>
+                <div class="tic-grid" id="tic-grid"></div>
+                <p id="tic-status">Your turn: X</p>
+                <button id="tic-again">Restart</button>
+            `;
+
+            let ended = false;
+
+            const won = player => wins.some(line =>
+                line.every(index => board[index] === player)
+            );
+
+            board.forEach((_, index) => {
+                const cell = document.createElement("button");
+                cell.className = "tic-cell";
+
+                cell.onclick = () => {
+                    if (ended || board[index]) return;
+
+                    board[index] = "X";
+                    cell.textContent = "X";
+
+                    if (won("X")) {
+                        $("tic-status").textContent = "You won!";
+                        ended = true;
+                        return;
+                    }
+
+                    const empty = board
+                        .map((value, i) => value ? null : i)
+                        .filter(i => i !== null);
+
+                    if (!empty.length) {
+                        $("tic-status").textContent = "Draw!";
+                        ended = true;
+                        return;
+                    }
+
+                    const move = empty[Math.floor(Math.random() * empty.length)];
+                    board[move] = "O";
+                    $("tic-grid").children[move].textContent = "O";
+
+                    if (won("O")) {
+                        $("tic-status").textContent = "Computer won!";
+                        ended = true;
+                    }
+                };
+
+                $("tic-grid").appendChild(cell);
+            });
+
+            $("tic-again").onclick = startTicTacToe;
+        }
+
+        document.querySelectorAll("[data-game]").forEach(button => {
+            button.onclick = () => {
+                const game = button.dataset.game;
+
+                if (game === "minesweeper") startMinesweeper();
+                if (game === "memory") startMemory();
+                if (game === "trivia") startTrivia();
+                if (game === "tictactoe") startTicTacToe();
+            };
+        });
+
+        const konamiCode = [
+            "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+            "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "KeyB", "KeyA"
+        ];
+        let konamiProgress = 0;
+
+        document.addEventListener("keydown", event => {
+            const key = event.code;
+
+            if (key === konamiCode[konamiProgress]) {
+                konamiProgress++;
+
+                if (konamiProgress === konamiCode.length) {
+                    $("calculator-tab").classList.toggle("konami-flipped");
+                    konamiProgress = 0;
+                }
+            } else {
+                konamiProgress = key === konamiCode[0] ? 1 : 0;
+            }
+        });
+
+        applySettings();
+        renderHistory();
+    </script>
+</body>
+</html>
