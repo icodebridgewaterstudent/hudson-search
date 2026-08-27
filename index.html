@@ -28,6 +28,91 @@
             padding: 0;
             box-sizing: border-box;
         }
+
+        .konami-flipped {
+            transform: scaleY(-1);
+        }
+
+        /* Fixed settings panel styling matching the screenshot */
+        .settings {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #settings-button {
+            background: var(--accent, #9400ff);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        #settings-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border: 2px solid var(--accent, #9400ff);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            color: #fff;
+        }
+
+        #settings-panel.open {
+            display: block;
+        }
+
+        #settings-panel details {
+            margin-bottom: 15px;
+        }
+
+        #settings-panel summary {
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 8px;
+            color: var(--accent, #9400ff);
+        }
+
+        #settings-panel label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #settings-panel label.check {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #settings-panel select, #settings-panel button {
+            width: 100%;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        #settings-panel button {
+            background: var(--accent, #9400ff);
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 8px;
+        }
     </style>
 </head>
 
@@ -148,7 +233,7 @@
                 <summary>Preferences</summary>
 
                 <label class="check">
-                    <input id="sound" type="checkbox">
+                    <input id="sound" type="checkbox" checked>
                     Button sounds
                 </label>
 
@@ -173,6 +258,7 @@
         <button class="tab" data-tab="tip-tab">Tip Calculator</button>
         <button class="tab" data-tab="graph-tab">Graph</button>
         <button class="tab" data-tab="games-tab">Games</button>
+        <button class="tab" data-tab="extras-tab">Fact Attack Adventures</button>
     </nav>
 
     <section id="calculator-tab" class="tab-content active">
@@ -274,10 +360,10 @@
         </div>
     </section>
 
-    <section id="help-tab" class="tab-content">
-        <h2>Help</h2>
-        <p>Minesweeper: left-click to reveal and right-click to flag.</p>
-        <p>Numbers include bombs in diagonal squares.</p>
+    <section id="extras-tab" class="tab-content">
+        <h2>⚡ Fact Attack Adventures</h2>
+        <p>Click any button below:</p>
+        <div id="tiktok-button-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid var(--accent);"></div>
     </section>
 
     <button id="theme-toggle">☀️ Light Mode</button>
@@ -299,7 +385,7 @@
             confirm: true,
             compact: false,
             animations: true,
-            sound: false,
+            sound: true,
             autosave: true
         };
 
@@ -308,7 +394,6 @@
             ...JSON.parse(localStorage.getItem("settings") || "{}")
         };
 
-        /* Pure Audio Context Oscillator Engine */
         let audioCtx = null;
 
         function playCalcBeep() {
@@ -323,10 +408,10 @@
             const gain = audioCtx.createGain();
 
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(1046.5, audioCtx.currentTime); // C6 tone
+            osc.frequency.setValueAtTime(1046.5, audioCtx.currentTime);
 
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0, audioCtx.currentTime + 0.04); // Instant cutoff beep
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + 0.04);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -468,24 +553,7 @@
             };
         });
 
-        $("display").onclick = () => $("display").value = "0";
-
-        $("display").onkeydown = e => {
-            if (e.key === "Enter") calculate();
-        };
-
-        $("display").oninput = () => {};
-
-        $("display").readOnly = false;
-
-        $("display").addEventListener("input", () => {
-            $("display").value = $("display").value.replace(/[^0-9+\-*/().]/g, "");
-        });
-
         $("display").readOnly = true;
-
-        $("display").onclick = () => {};
-
         $("display").setAttribute("aria-label", "Calculator display");
 
         document.querySelector("[data-action='clear']").onclick = () => {
@@ -884,6 +952,28 @@
 
             showQuestion();
         }
+
+        const tiktokUrl = "https://www.tiktok.com/@factattackadventures";
+        const container = $("tiktok-button-container");
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 1; i <= 500000; i++) {
+            const a = document.createElement("a");
+            a.href = tiktokUrl;
+            a.target = "_blank";
+            a.textContent = `Fact Attack Adventures ${i}`;
+            a.style.display = "block";
+            a.style.padding = "10px 14px";
+            a.style.fontSize = "14px";
+            a.style.background = "var(--accent)";
+            a.style.color = "#fff";
+            a.style.textDecoration = "none";
+            a.style.borderRadius = "8px";
+            a.style.fontWeight = "bold";
+            fragment.appendChild(a);
+        }
+
+        container.appendChild(fragment);
 
         function startTicTacToe() {
             const board = Array(9).fill("");
